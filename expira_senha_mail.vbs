@@ -3,7 +3,7 @@
 'Author     : Carlton Colter   
 'Purpose    : To notify users of password expiration via E-Mail   
 'Created    : 8/4/2008   
-'Note       : Modification of Douglas Urbano 2013 Script:    
+'Note       : Modification of Douglas Urbano 03/03/2013 Script:    
 '             http://www.benway.net/2005/09/20/223/   
 '   
 ' Este script envia um e-mail para o usuário quando sua senha estiver para expirar.
