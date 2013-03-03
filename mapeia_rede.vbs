@@ -68,7 +68,7 @@ wshNetwork.MapNetworkDrive"H:","\\Server\Folder\IT" 'Caminho real da pasta
 wshNetwork.MapNetworkDrive"P:","\\Server\Folder\Public" 'Caminho real da pasta
 wshNetwork.MapNetworkDrive"S:","\\Server\Folder\Scanner" 'Caminho real da pasta
 
-'Namespace, ou seja, ao ser mapeado, os nomes que serão mostrados Ex: It, Scaner...
+'Namespace, ou seja, ao ser mapeado, os nomes que serão mostrados Ex: It, Scanner...
 
 oShell.NameSpace("H:\").Self.Name = "IT" 
 oShell.NameSpace("P:\").Self.Name = "Public"
