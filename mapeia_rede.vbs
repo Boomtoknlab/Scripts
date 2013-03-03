@@ -1,5 +1,13 @@
 On Error Resume Next
 
+'****************************************************************************
+'Script Name: mapeia_rede.vbs
+'Author : Douglas Urbano
+'Purpose : Criar pastas de rede com namespace, e criar pasta user de acordo com login
+'****************************************************************************
+'****************************************************************************
+
+
 Set wshShell = CreateObject("WScript.Shell")
 wshShell.Run "NET TIME \\Server /SET /Y", 0, True 'Sincroniza as máquinas com a hora do Domain Controller
 
