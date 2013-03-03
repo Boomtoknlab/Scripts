@@ -3,6 +3,7 @@ On Error Resume Next
 '****************************************************************************
 'Script Name: mapeia_rede.vbs
 'Author : Douglas Urbano
+'Date: 03/03/2013
 'Purpose : Criar pastas de rede com namespace, e criar pasta user de acordo com login
 '****************************************************************************
 '****************************************************************************
