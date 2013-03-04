@@ -75,3 +75,15 @@ oShell.NameSpace("H:\").Self.Name = "IT"
 oShell.NameSpace("P:\").Self.Name = "Public"
 oShell.NameSpace("U:\").Self.Name = "User"
 oShell.NameSpace("S:\").Self.Name = "Scanner"
+
+'Boas Vindas Ao Usuario
+
+Set objUser = WScript.CreateObject("WScript.Network")
+wuser=objUser.UserName
+If Time <= "12:00:00" Then
+MsgBox ("Bom Dia "+Wuser+", você acaba de ingressar na rede corporativa da Empresa, por favor respeite as políticas de segurança!")
+ElseIf Time >= "12:00:01" And Time <= "18:00:00" Then
+MsgBox ("Boa Tarde "+Wuser+", você acaba de ingressar na rede corporativa da Empresa, por favor respeite as políticas de segurança!")
+Else
+MsgBox ("Boa Noite "+wuser+", você acaba de ingressar na rede corporativa da Empresa, por favor respeite as políticas de segurança!")
+End If
