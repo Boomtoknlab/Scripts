@@ -1,4 +1,4 @@
-'Modificação I: Variaveis com datas de Hoje e ontem
+'Modificação I: Variaveis com as datas de Hoje e ontem
 dtmOntem = Date() -1
 dtmHoje = Date()
 
