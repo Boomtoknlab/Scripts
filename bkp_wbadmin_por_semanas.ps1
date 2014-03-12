@@ -70,10 +70,10 @@ $result = "$result $loghtml"
 #Configurando seu e-mail para receber as notificações
 
 $mail = New-Object system.net.Mail.MailMessage 
-$mail.From  = "douglas.urbano@Wal-mart.com"
-$mail.To.add("douglas.urbano@wal-mart.com")
+$mail.From  = "seu-email@domain.com"
+$mail.To.add("backup@domain.com")
 $mail.Subject = "Backup Script Results $status $comp $date"
-$smtp = new-object system.Net.Mail.SmtpClient("smtp.gmail.com")
+$smtp = new-object system.Net.Mail.SmtpClient("smtp.domain.com")
 $mail.IsBodyHtml = "True"
 $mail.body = $result 
 $smtp.send($mail)
