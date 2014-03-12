@@ -73,7 +73,7 @@ $mail = New-Object system.net.Mail.MailMessage
 $mail.From  = "douglas.urbano@Wal-mart.com"
 $mail.To.add("douglas.urbano@wal-mart.com")
 $mail.Subject = "Backup Script Results $status $comp $date"
-$smtp = new-object system.Net.Mail.SmtpClient("css-smtp-edc.wal-mart.com")
+$smtp = new-object system.Net.Mail.SmtpClient("smtp.gmail.com")
 $mail.IsBodyHtml = "True"
 $mail.body = $result 
 $smtp.send($mail)
