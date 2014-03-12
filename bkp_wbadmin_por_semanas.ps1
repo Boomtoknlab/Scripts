@@ -14,7 +14,7 @@ $log = $folder + $comp + '.log'
  
 # Mapeando o compartilhamento
 try{
-$mapprocess = start -Wait  net -ArgumentList  "use  i: $share qt@13x40@6 /USER:administrator" -PassThru  -NoNewWindow
+$mapprocess = start -Wait  net -ArgumentList  "use  i: $share suasenha /USER:seuuserbackup" -PassThru  -NoNewWindow
 $mapcode = $mapprocess.exitcode 
 if ($mapcode  -ne 0 ){
 $result = "$result br Computer $comp FAILED to map drive br with error code $mapcode br br"
