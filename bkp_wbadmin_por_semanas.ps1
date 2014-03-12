@@ -1,6 +1,7 @@
 # Este script fará uma cópia do backup, de sua unidade X: de sua escolha, copiando na rede em \\servidor\compartilhamento 
 # Ele verificar o dia da semana, exemplo Monday, Tuesday etc... e criará uma pasta com este dia e a data
 #Na próxima semana, ele irá subscrever o arquivo daquele dia exemplo Monday
+# Usuário tem que estar no grupo de backup ou ser administrator para ter sucesso ao rodar o comando ou deixar como schedule
 
 #script busca localização, dia, data e semana
 clear
@@ -14,7 +15,7 @@ $log = $folder + $comp + '.log'
  
 # Mapeando o compartilhamento
 try{
-$mapprocess = start -Wait  net -ArgumentList  "use  i: $share suasenha /USER:seuuserbackup" -PassThru  -NoNewWindow
+$mapprocess = start -Wait  net -ArgumentList  "use  i: $share " -PassThru  -NoNewWindow
 $mapcode = $mapprocess.exitcode 
 if ($mapcode  -ne 0 ){
 $result = "$result br Computer $comp FAILED to map drive br with error code $mapcode br br"
