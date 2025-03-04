@@ -6,13 +6,13 @@
 'Note       : Modification of Douglas Urbano 03/03/2013 Script:    
 '             http://www.benway.net/2005/09/20/223/   
 '   
-' Este script envia um e-mail para o usuário quando sua senha estiver para expirar.
+' This script sends an email to the user when their password is about to expire.
 '**************************************************************************************   
     
 '**************************************************************************************   
 ' Per environment constants - you should change these!   
-Const SMTP_SERVER  = "192.168.2.222" ' Endereço do meu Exchange    
-Const LDAPPATH     = "LDAP://dominio.br/OU=IT,DC=dominio,DC=com" ' 
+Const SMTP_SERVER  = "192.168.2.222" ' Address of my Exchange    
+Const LDAPPATH     = "LDAP://domain.br/OU=IT,DC=domain,DC=com" ' 
 Const DAYS_FOR_EMAIL  = 15 
    
 ' System Constants - do not change   
@@ -23,9 +23,9 @@ Const E_ADS_PROPERTY_NOT_FOUND  = &h8000500D
    
 Dim numDays, iResult   
 Dim strDomainDN   
-Dim objContainer   
+Dim objContainer
    
-numdays = 45 'Maximo da idade da sua senha
+numdays = 45 'Maximum password age
    
 If numDays > 0 Then   
   Set objContainer = GetObject (LDAPPATH)   
@@ -35,7 +35,6 @@ If numDays > 0 Then
 End If   
    
 WScript.Echo "Notification Complete"   
-   
    
 '**************************************************************************************   
 Sub ProcessOU (OU, numDays)   
@@ -51,10 +50,10 @@ End Sub
 '**************************************************************************************   
 Function UserIsExpired (objUser, iMaxAge, iDaysForEmail, iRes)   
  Dim intUserAccountControl, dtmValue, intTimeInterval   
- Dim strName   
+ Dim strName
    
  On Error Resume Next   
- Err.Clear   
+ Err.Clear
    
  strName = Mid (objUser.Name, 4)   
  intUserAccountControl = objUser.Get ("userAccountControl")   
@@ -79,7 +78,7 @@ Function UserIsExpired (objUser, iMaxAge, iDaysForEmail, iRes)
     Else   
      UserIsExpired = False   
     End If   
-   End If   
+   End If
    
   End If   
  End If   
@@ -87,7 +86,7 @@ End Function
    
 '**************************************************************************************   
 Sub ProcessFolder (objContainer, iMaxPwdAge)   
- Dim objUser, iResult   
+ Dim objUser, iResult
    
  objContainer.Filter = Array ("User")   
    
@@ -105,7 +104,7 @@ Sub SendEmail (objUser, iResult)
 On Error Resume Next 'Ignore All Errors   
 If iResult > 0 Then   
 If LEN(objUser.givenname)>1 Then   
- Dim objMail   
+ Dim objMail
    
  Set objMail = CreateObject ("CDO.Message")   
    
@@ -114,7 +113,7 @@ If LEN(objUser.givenname)>1 Then
   .Item ("http://schemas.microsoft.com/cdo/configuration/smtpserver")     = SMTP_SERVER   
   .Item ("http://schemas.microsoft.com/cdo/configuration/smtpserverport") = 25   
   .Update   
- End With   
+ End With
    
  ' Make it a high priority   
  With objMail.Fields   
@@ -122,12 +121,12 @@ If LEN(objUser.givenname)>1 Then
   .Item("urn:schemas:mailheader:X-Priority") = 2 ' For Outlook 2003 also   
   .Item("urn:schemas:httpmail:importance") = 2 ' For Outlook Express   
   .Update   
- End With   
+ End With
    
    
  ' Send the email to the user's userprincipal name (you can change this to .mail)   
  objMail.From     = objUser.UserPrincipalName 'STRFROM   
- objMail.To       = objUser.UserPrincipalName   
+ objMail.To       = objUser.UserPrincipalName
    
  objMail.Subject  = "Automatic Password Expiration Notification"   
    
@@ -149,9 +148,9 @@ If LEN(objUser.givenname)>1 Then
     "Thank you," & vbCRLF & vbCRLF & _   
     "Internal Systems"   
    
- objMail.Send   
+ objMail.Send
    
- Set objMail = Nothing   
+ Set objMail = Nothing
    
 End If   
 End If   
