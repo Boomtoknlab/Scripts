@@ -1,80 +1,61 @@
-# Este script fará uma cópia do backup, de sua unidade X: de sua escolha, copiando na rede em \\servidor\compartilhamento 
-# Ele verificar o dia da semana, exemplo Monday, Tuesday etc... e criará uma pasta com este dia e a data
-#Na próxima semana, ele irá subscrever o arquivo daquele dia exemplo Monday
-# Usuário tem que estar no grupo de backup ou ser administrator para ter sucesso ao rodar o comando ou deixar como schedule
+# Clear the screen
+Clear-Host
 
-#script busca localização, dia, data e semana
-clear
-$date = get-date -UFormat %Y-%m-%d
-$week = ( get-date ).DayOfWeek
-$day = get-date 
+# Define variables
+$date = Get-Date -Format "yyyy-MM-dd"
+$week = (Get-Date).DayOfWeek
+$comp = $env:COMPUTERNAME
+$user = $env:USERNAME
 $share = '\\srv\testando'
-$folder = $share + '\'  +$comp + '\' + $week + '\'+ $date + '\' 
-$include = 'include'
-$log = $folder + $comp + '.log'
- 
-# Mapeando o compartilhamento
-try{
-$mapprocess = start -Wait  net -ArgumentList  "use  i: $share " -PassThru  -NoNewWindow
-$mapcode = $mapprocess.exitcode 
-if ($mapcode  -ne 0 ){
-$result = "$result br Computer $comp FAILED to map drive br with error code $mapcode br br"
-}}
-catch [exception] {
-$result = "$result br Computer $comp FAILED to map drive br br"
-}
- 
-#Criando a pasta do backup se não existir
-try {
-if ( ! (Test-Path  -Path $folder ) ){
-New-Item  -Path $folder  -ItemType Directory -ErrorAction Stop
-}}
-catch [exception] {
-$result = "$result br Computer $comp FAILED to create folder br br"
+$folder = "$share\$comp\$week\$date\"
+$log = "$folder$comp.log"
+
+# Map network drive
+net use i: /delete /Y
+$mapprocess = Start-Process -Wait -NoNewWindow -PassThru -FilePath net -ArgumentList "use i: $share"
+if ($mapprocess.ExitCode -ne 0) {
+    Write-Host "Failed to map drive."
+    exit 1
 }
 
-# Criando arquivos de logs em .txt e .html
-
-try {
-if ( ! (Test-Path  -Path $log ) ){
-New-Item  -Path $log   -ItemType File -ErrorAction Stop
-}}
-catch [exception] 
-{
-$result = "$result br Computer $comp FAILED to create log file br br"
+# Create backup folder if not exists
+if (!(Test-Path -Path $folder)) {
+    New-Item -Path $folder -ItemType Directory -Force | Out-Null
 }
+
+# Create log file if not exists
+if (!(Test-Path -Path $log)) {
+    New-Item -Path $log -ItemType File -Force | Out-Null
+}
+
+# Start backup
 $start = Get-Date
-$process = start -Wait  wbadmin.exe -ArgumentList "start backup -backuptarget:$folder -include:E: -quiet" -PassThru -NoNewWindow -RedirectStandardOutput $log
-$code = $process.exitcode 
-if ($code  -eq 0 ){
+$process = Start-Process -Wait -NoNewWindow -PassThru -FilePath wbadmin.exe -ArgumentList "start backup -backuptarget:$folder -include:E: -quiet" -RedirectStandardOutput $log
 $end = Get-Date
-$result = "$result backup complete on $comp, user $user br Started: $start br  Ended: $end br br"
-$status = "good"
-start net -ArgumentList "use i: /delete /Y" -NoNewWindow 
-}
-else { 
-$end = Get-Date
-$result= "$result Backup Failed on $comp, br Started: $start br  Ended: $end  br br"
-$status = "BAD" }
-$loghtmlfile = $log + '.html'
-$File = Get-Content $log
-$FileLine = @()
-Foreach ($Line in $File) {
- $MyObject = New-Object -TypeName PSObject
- Add-Member -InputObject $MyObject -Type NoteProperty -Name backupstatus -Value $Line
- $FileLine += $MyObject
-}
-$FileLine | ConvertTo-Html -Property backupstatus | Out-File $loghtmlfile
-$loghtml = gc $loghtmlfile 
-$result = "$result $loghtml"
 
-#Configurando seu e-mail para receber as notificações
+# Backup result
+if ($process.ExitCode -eq 0) {
+    $status = "SUCCESS"
+    $result = "Backup completed on $comp by $user. Started: $start, Ended: $end`n"
+} else {
+    $status = "FAILED"
+    $result = "Backup failed on $comp. Started: $start, Ended: $end`n"
+}
 
-$mail = New-Object system.net.Mail.MailMessage 
-$mail.From  = "seu-email@domain.com"
-$mail.To.add("backup@domain.com")
-$mail.Subject = "Backup Script Results $status $comp $date"
-$smtp = new-object system.Net.Mail.SmtpClient("smtp.domain.com")
-$mail.IsBodyHtml = "True"
-$mail.body = $result 
-$smtp.send($mail)
+# Convert log to HTML
+$loghtmlfile = "$log.html"
+Get-Content $log | ConvertTo-Html -Property PSObject | Out-File $loghtmlfile
+$result += Get-Content $loghtmlfile -Raw
+
+# Send email notification
+$mail = New-Object system.net.Mail.MailMessage
+$mail.From = "seu-email@domain.com"
+$mail.To.Add("backup@domain.com")
+$mail.Subject = "Backup Results: $status on $comp - $date"
+$mail.IsBodyHtml = $true
+$mail.Body = $result
+$smtp = New-Object system.Net.Mail.SmtpClient("smtp.domain.com")
+$smtp.Send($mail)
+
+# Unmap network drive
+net use i: /delete /Y
