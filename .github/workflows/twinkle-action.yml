@@ -1,0 +1,57 @@
+name: Twinkle Action Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify-twinkle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install ethers dotenv fs axios
+
+      - name: Verify Twinkle Token Ownership
+        env:
+          RPC_URL: "https://bsc-dataseed.binance.org"
+          TWINKLE_CONTRACT: "0xYourTwinkleContractAddress"  # Replace with your Twinkle token contract address
+          TOKEN_ID: "YourTwinkleTokenId"                    # Replace with your Twinkle token ID
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node verify-twinkle.js
+
+      - name: Add Label for Verified Twinkle Holders
+        if: success()
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: "Verified Twinkle Holder"
+
+      - name: Send Telegram Alert
+        if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+          -d "chat_id=$TELEGRAM_CHAT_ID" \
+          -d "text=✅ Verified Twinkle Holder has submitted a PR!"
+
+      - name: Send Discord Alert
+        if: success() && env.DISCORD_WEBHOOK_URL
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+          -H "Content-Type: application/json" \
+          -d '{"content": "✅ Verified Twinkle Holder has submitted a PR!"}'
