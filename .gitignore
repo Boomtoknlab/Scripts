@@ -1,11 +1,33 @@
-# Build and Release Folders
+# Ignore build and release folders
 bin/
 bin-debug/
 bin-release/
 
-# Other files and folders
+# Ignore Eclipse settings folder
 .settings/
 
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
+# Ignore temporary and backup files
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+
+# Ignore compiled and generated files
+*.class
+*.swf
+*.air
+*.apk
+
+# Ignore package manager dependencies (if applicable)
+node_modules/
+bower_components/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Keep essential project configuration files
+!.project
+!.actionScriptProperties
+!.flexProperties
