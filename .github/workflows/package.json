@@ -1,0 +1,11 @@
+{
+  "name": "token-claims-repo",
+  "version": "1.0.0",
+  "description": "Repository for handling token claims recipient addresses",
+  "main": "token-claims.js",
+  "scripts": {
+    "start": "node token-claims.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
