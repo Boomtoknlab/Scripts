@@ -1,0 +1,53 @@
+name: Verify NFT Ownership
+
+on:
+  workflow_dispatch:  # Manually trigger the workflow
+
+jobs:
+  verify-nft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install ethers dotenv
+
+      - name: Verify NFT Ownership
+        env:
+          INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
+          WALLET_ADDRESS: "YOUR_WALLET_ADDRESS_HERE"
+        run: |
+          cat << EOF > verify.js
+          const { ethers } = require("ethers");
+
+          const provider = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+          const contractAddress = "0xADC466855ebe8d1402C5F7e6706Fccc3AEdB44a0";
+          const tokenId = 4176406;
+          const walletAddress = process.env.WALLET_ADDRESS;
+
+          const abi = [
+            "function ownerOf(uint256 tokenId) external view returns (address)"
+          ];
+
+          async function checkOwnership() {
+            const contract = new ethers.Contract(contractAddress, abi, provider);
+            const owner = await contract.ownerOf(tokenId);
+
+            if (owner.toLowerCase() === walletAddress.toLowerCase()) {
+              console.log("✅ NFT Ownership Verified!");
+              process.exit(0);
+            } else {
+              console.log("❌ Ownership Mismatch: NFT is owned by", owner);
+              process.exit(1);
+            }
+          }
+
+          checkOwnership();
+          EOF
+          node verify.js
