@@ -1,0 +1,25 @@
+name: Token Claims Distribution
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-token-claims:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Token Claims Script
+        run: node token-claims.js
