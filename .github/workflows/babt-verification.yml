@@ -1,0 +1,97 @@
+name: BABT Ownership Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify-babt:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm install ethers dotenv fs axios
+
+      - name: Verify BABT Ownership
+        env:
+          RPC_URL: "https://bsc-dataseed.binance.org"
+          BABT_CONTRACT: "0x2B09d47D550061f995A3b5C6F0Fd58005215D7c8"
+          TOKEN_ID: "602795"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat <<EOF > verify.js
+          const { ethers } = require("ethers");
+          const fs = require("fs");
+
+          async function verifyBABT() {
+              const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+              const contract = new ethers.Contract(
+                  process.env.BABT_CONTRACT,
+                  ["function ownerOf(uint256 tokenId) public view returns (address)"],
+                  provider
+              );
+
+              try {
+                  const owner = await contract.ownerOf(process.env.TOKEN_ID);
+                  console.log("✅ BABT Token Owner:", owner);
+
+                  const allowedWallets = JSON.parse(fs.readFileSync("allowed_wallets.json")).wallets;
+
+                  if (allowedWallets.includes(owner.toLowerCase())) {
+                      console.log("✅ Access Granted: User owns BABT Token #602795.");
+                      process.exit(0);
+                  } else {
+                      console.log("⛔ Access Denied: User does not own BABT Token #602795.");
+                      process.exit(1);
+                  }
+              } catch (error) {
+                  console.error("⚠️ Error verifying BABT ownership:", error);
+                  process.exit(1);
+              }
+          }
+
+          verifyBABT();
+          EOF
+
+          node verify.js
+
+      - name: Auto-Approve PR for Verified BABT Holders
+        if: success()
+        uses: hmarr/auto-approve-action@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add Label for Verified BABT Holders
+        if: success()
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: "Verified BABT Holder"
+
+      - name: Send Telegram Alert
+        if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+          -d "chat_id=$TELEGRAM_CHAT_ID" \
+          -d "text=✅ Verified BABT Holder has submitted a PR! 🚀"
+
+      - name: Send Discord Alert
+        if: success() && env.DISCORD_WEBHOOK_URL
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+          -H "Content-Type: application/json" \
+          -d '{"content": "✅ Verified BABT Holder has submitted a PR! 🚀"}'
