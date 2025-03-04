@@ -4,21 +4,20 @@ On Error Resume Next
 'Script Name: mapeia_rede.vbs
 'Author : Douglas Urbano
 'Date: 03/03/2013
-'Purpose : Criar pastas de rede com namespace, e criar pasta user de acordo com login
+'Purpose : Create network folders with namespace, and create user folder according to login
 '****************************************************************************
 '****************************************************************************
 
-
+' Synchronize the machines with the time of the Domain Controller
 Set wshShell = CreateObject("WScript.Shell")
-wshShell.Run "NET TIME \\Server /SET /Y", 0, True 'Sincroniza as máquinas com a hora do Domain Controller
+wshShell.Run "NET TIME \\Server /SET /Y", 0, True
 
 Set oShell = CreateObject("Shell.Application")
 
 Set wshNetwork = CreateObject("WScript.Network")
 Set oDrives = WshNetwork.EnumNetworkDrives
 
-'Desconectar estas unidades de redes
-
+' Disconnect these network drives
 WSHNetwork.RemoveNetworkDrive "G:", True, True
 WSHNetwork.RemoveNetworkDrive "H:", True, True
 WSHNetwork.RemoveNetworkDrive "I:", True, True
@@ -37,53 +36,48 @@ WSHNetwork.RemoveNetworkDrive "U:", True, True
 WSHNetwork.RemoveNetworkDrive "V:", True, True
 WSHNetwork.RemoveNetworkDrive "X:", True, True
 WSHNetwork.RemoveNetworkDrive "Y:", True, True
-WSHNetwork.RemoveNetworkDrive "w:", True, True
+WSHNetwork.RemoveNetworkDrive "W:", True, True
 WSHNetwork.RemoveNetworkDrive "Z:", True, True
 
-'Se não existir o usuário ao se logar, então, crie nesta pasta
-
+' If the user does not exist upon login, create in this folder
 Set wshell = createobject("wscript.network")
 user1 = wshell.username
 Set FileClass = CreateObject("Scripting.FileSystemObject")
 Directory = "\\server\folder\" & user1
 If FileClass.FolderExists (Directory) = False Then
-FileClass.CreateFolder (Directory)
+    FileClass.CreateFolder (Directory)
 End If
 
 WScript.DisconnectObject WSHNetwork
 
-
+' Map the user's drive with the letter U
 Dim objNetwork
 Dim strDriveLetter, strRemotePath, strUserName
 strDriveLetter = "U:"
-strRemotePath = "\\Server\Folder_Users" ' Mapeia a unidade do usuário com a Letra U
+strRemotePath = "\\Server\Folder_Users"
 
 Set objNetwork = WScript.CreateObject("WScript.Network")
-
 strUserName = objNetwork.UserName
-objNetwork.MapNetworkDrive strDriveLetter, strRemotePath _
-& "\" & strUserName
+objNetwork.MapNetworkDrive strDriveLetter, strRemotePath & "\" & strUserName
 
+' Map other network drives
+wshNetwork.MapNetworkDrive "H:", "\\Server\Folder\IT" ' Path to the IT folder
+wshNetwork.MapNetworkDrive "P:", "\\Server\Folder\Public" ' Path to the Public folder
+wshNetwork.MapNetworkDrive "S:", "\\Server\Folder\Scanner" ' Path to the Scanner folder
 
-wshNetwork.MapNetworkDrive"H:","\\Server\Folder\IT" 'Caminho real da pasta
-wshNetwork.MapNetworkDrive"P:","\\Server\Folder\Public" 'Caminho real da pasta
-wshNetwork.MapNetworkDrive"S:","\\Server\Folder\Scanner" 'Caminho real da pasta
-
-'Namespace, ou seja, ao ser mapeado, os nomes que serão mostrados Ex: It, Scanner...
-
-oShell.NameSpace("H:\").Self.Name = "IT" 
+' Set namespace names for the mapped drives
+oShell.NameSpace("H:\").Self.Name = "IT"
 oShell.NameSpace("P:\").Self.Name = "Public"
 oShell.NameSpace("U:\").Self.Name = "User"
 oShell.NameSpace("S:\").Self.Name = "Scanner"
 
-'Boas Vindas Ao Usuario
-
+' Welcome message to the user
 Set objUser = WScript.CreateObject("WScript.Network")
-wuser=objUser.UserName
+wuser = objUser.UserName
 If Time <= "12:00:00" Then
-MsgBox ("Bom Dia "+Wuser+", você acaba de ingressar na rede corporativa da Empresa, por favor respeite as políticas de segurança!")
+    MsgBox ("Good Morning " + wuser + ", you have just joined the company network, please adhere to the security policies!")
 ElseIf Time >= "12:00:01" And Time <= "18:00:00" Then
-MsgBox ("Boa Tarde "+Wuser+", você acaba de ingressar na rede corporativa da Empresa, por favor respeite as políticas de segurança!")
+    MsgBox ("Good Afternoon " + wuser + ", you have just joined the company network, please adhere to the security policies!")
 Else
-MsgBox ("Boa Noite "+wuser+", você acaba de ingressar na rede corporativa da Empresa, por favor respeite as políticas de segurança!")
+    MsgBox ("Good Evening " + wuser + ", you have just joined the company network, please adhere to the security policies!")
 End If
