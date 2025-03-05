@@ -1,0 +1,22 @@
+name: Solana QuickNode Test
+
+on: [push]
+
+jobs:
+  solana-quicknode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          solana --version
+
+      - name: Configure QuickNode RPC
+        run: solana config set --url ${{ secrets.QUICKNODE_RPC }}
+
+      - name: Get Recent Blockhash
+        run: solana block
